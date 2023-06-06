@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import com.google.gson.*;
 import org.junit.jupiter.api.*;
 
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.adapters.LocalDateAdapter;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -13,8 +14,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 
-
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@SpringBootTest
 class UserControllerTest {
 
 
