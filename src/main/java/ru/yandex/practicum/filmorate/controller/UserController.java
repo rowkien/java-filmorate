@@ -75,8 +75,7 @@ public class UserController {
         if (users.containsKey(user.getId())) {
             user.setId(user.getId());
             users.put(user.getId(), user);
-        }
-        else {
+        } else {
             String exception = "Такого фильма нет!";
             log.info(exception);
             throw new ValidationException(exception);
