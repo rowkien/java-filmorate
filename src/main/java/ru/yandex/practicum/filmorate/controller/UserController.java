@@ -26,12 +26,12 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody User user) {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             String exception = "Электронная почта не может быть пустой и должна содержать символ @!";
             log.info(exception);
             throw new ValidationException(exception);
         }
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+        if ((user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" "))) {
             String exception = "Логин не может быть пустым и содержать пробелы!";
             log.info(exception);
             throw new ValidationException(exception);
@@ -39,8 +39,8 @@ public class UserController {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            String exception = "Дата рождения не может быть в будущем!";
+        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
+            String exception = "Дата рождения не может быть пустой или в будущем!";
             log.info(exception);
             throw new ValidationException(exception);
         }
@@ -54,12 +54,12 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             String exception = "Электронная почта не может быть пустой и должна содержать символ @!";
             log.info(exception);
             throw new ValidationException(exception);
         }
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+        if ((user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" "))) {
             String exception = "Логин не может быть пустым и содержать пробелы!";
             log.info(exception);
             throw new ValidationException(exception);
@@ -67,8 +67,8 @@ public class UserController {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            String exception = "Дата рождения не может быть в будущем!";
+        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
+            String exception = "Дата рождения не может быть пустой или в будущем!";
             log.info(exception);
             throw new ValidationException(exception);
         }
@@ -76,7 +76,7 @@ public class UserController {
             user.setId(user.getId());
             users.put(user.getId(), user);
         } else {
-            String exception = "Такого фильма нет!";
+            String exception = "Такого пользователя нет!";
             log.info(exception);
             throw new ValidationException(exception);
         }

@@ -26,18 +26,17 @@ public class FilmController {
 
     @PostMapping
     public Film createFilm(@RequestBody Film film) {
-        if (film.getName().isBlank() || film.getDescription().length() > 200) {
+        if (film.getName() == null || film.getName().isBlank() || film.getDescription().length() > 200) {
             String exception = "Название фильма не может быть пустым или содержать более 200 символов!";
             log.info(exception);
             throw new ValidationException(exception);
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            String exception = "Дата фильма не может быть раньше 28.12.1895!";
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            String exception = "Дата фильма не может быть пустой или раньше 28.12.1895!";
             log.info(exception);
             throw new ValidationException(exception);
         }
-
-        if (film.getDuration() < 0) {
+        if (film.getDuration() <= 0) {
             String exception = "Продолжительность фильма не может быть отрицательной!";
             log.info(exception);
             throw new ValidationException(exception);
@@ -52,18 +51,18 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        if (film.getName().isBlank() || film.getDescription().length() > 200) {
+        if (film.getName() == null || film.getName().isBlank() || film.getDescription().length() > 200) {
             String exception = "Название фильма не может быть пустым или содержать более 200 символов!";
             log.info(exception);
             throw new ValidationException(exception);
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            String exception = "Дата фильма не может быть раньше 28.12.1895!";
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            String exception = "Дата фильма не может быть пустой или раньше 28.12.1895!";
             log.info(exception);
             throw new ValidationException(exception);
         }
 
-        if (film.getDuration() < 0) {
+        if (film.getDuration() <= 0) {
             String exception = "Продолжительность фильма не может быть отрицательной!";
             log.info(exception);
             throw new ValidationException(exception);

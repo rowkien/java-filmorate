@@ -1,277 +1,143 @@
 package ru.yandex.practicum.filmorate;
 
-import com.google.gson.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.adapters.LocalDateAdapter;
+import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.LocalDate;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserControllerTest {
 
+    UserController userController;
 
-    @Order(1)
+    @BeforeEach
+    public void beforeEach() {
+        userController = new UserController();
+    }
+
+
     @Test
-    public void shouldCreateUser() throws IOException, InterruptedException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        Gson gson = gsonBuilder.create();
+    public void shouldCreateUser() {
         User user = new User();
         user.setId(1);
         user.setLogin("rowkien");
         user.setEmail("rowkien@yandex.ru");
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(1997, 5, 19));
-        String json = gson.toJson(user);
-        URI uri = URI.create("http://localhost:8080/users");
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = requestBuilder
-                .POST(body)
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        HttpClient httpClient = HttpClient.newHttpClient();
-
-        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        HttpResponse<String> response = httpClient.send(request, handler);
-        String returned = response.body();
-        User returnedUser = gson.fromJson(returned, User.class);
-        Assertions.assertEquals(returnedUser, user);
+        User createdUser = userController.createUser(user);
+        Assertions.assertEquals(user, createdUser);
     }
 
-    @Order(2)
     @Test
-    public void shouldGetAllUsers() throws IOException, InterruptedException {
-        URI uri = URI.create("http://localhost:8080/users");
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        HttpRequest request = requestBuilder
-                .GET()
-                .uri(uri)
-                .build();
-        HttpClient httpClient = HttpClient.newHttpClient();
-        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        HttpResponse<String> response = httpClient.send(request, handler);
-        String body = response.body();
-        JsonElement json = JsonParser.parseString(body);
-        if (json.isJsonArray() && !json.isJsonNull()) {
-            JsonArray jsonArray = json.getAsJsonArray();
-            Assertions.assertEquals(1, jsonArray.size());
+    public void shouldGetAllUsers() {
+        User user = new User();
+        user.setId(1);
+        user.setLogin("rowkien");
+        user.setEmail("rowkien@yandex.ru");
+        user.setName("Nikita");
+        user.setBirthday(LocalDate.of(1997, 5, 19));
+        userController.createUser(user);
+        Assertions.assertEquals(user, userController.getAllUsers().get(0));
+    }
+
+    @Test
+    public void shouldUpdateUserWithNewLogin() {
+        User user = new User();
+        user.setId(1);
+        user.setLogin("rowkien");
+        user.setEmail("rowkien@yandex.ru");
+        user.setName("Nikita");
+        user.setBirthday(LocalDate.of(1997, 5, 19));
+        userController.createUser(user);
+        user.setLogin("updated");
+        User updatedUser = userController.updateUser(user);
+        Assertions.assertEquals(updatedUser.getLogin(), "updated");
+    }
+
+    @Test
+    public void shouldNotCreateUserWithEmptyLogin() {
+        User user = new User();
+        user.setId(1);
+        user.setEmail("rowkien@yandex.ru");
+        user.setName("Nikita");
+        user.setBirthday(LocalDate.of(1997, 5, 19));
+        try {
+            userController.createUser(user);
+        } catch (ValidationException exception) {
+            Assertions.assertEquals(exception.getMessage(), "Логин не может быть пустым и содержать пробелы!");
         }
     }
 
-    @Order(3)
     @Test
-    public void shouldUpdateUserWithNewLogin() throws IOException, InterruptedException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        Gson gson = gsonBuilder.create();
-        User user = new User();
-        user.setId(1);
-        user.setLogin("updatedLogin");
-        user.setEmail("rowkien@yandex.ru");
-        user.setName("Nikita");
-        user.setBirthday(LocalDate.of(1997, 5, 19));
-        String json = gson.toJson(user);
-        URI uri = URI.create("http://localhost:8080/users");
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = requestBuilder
-                .PUT(body)
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        HttpClient httpClient = HttpClient.newHttpClient();
-
-        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        HttpResponse<String> response = httpClient.send(request, handler);
-        String returned = response.body();
-        User returnedUser = gson.fromJson(returned, User.class);
-        Assertions.assertEquals(user.getLogin(), returnedUser.getLogin());
-    }
-
-    @Order(4)
-    @Test
-    public void shouldNotCreateUserWithEmptyLogin() throws IOException, InterruptedException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        Gson gson = gsonBuilder.create();
-        User user = new User();
-        user.setId(1);
-        user.setEmail("rowkien@yandex.ru");
-        user.setName("Nikita");
-        user.setBirthday(LocalDate.of(1997, 5, 19));
-        String json = gson.toJson(user);
-        URI uri = URI.create("http://localhost:8080/users");
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = requestBuilder
-                .POST(body)
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        HttpClient httpClient = HttpClient.newHttpClient();
-
-        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        HttpResponse<String> response = httpClient.send(request, handler);
-        String returned = response.body();
-        User returnedUser = gson.fromJson(returned, User.class);
-        Assertions.assertNull(returnedUser.getLogin());
-    }
-
-    @Order(5)
-    @Test
-    public void shouldNotCreateUserWithBadLogin() throws IOException, InterruptedException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        Gson gson = gsonBuilder.create();
+    public void shouldNotCreateUserWithBadLogin() {
         User user = new User();
         user.setId(1);
         user.setLogin("bad login");
         user.setEmail("rowkien@yandex.ru");
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(1997, 5, 19));
-        String json = gson.toJson(user);
-        URI uri = URI.create("http://localhost:8080/users");
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = requestBuilder
-                .POST(body)
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        HttpClient httpClient = HttpClient.newHttpClient();
-
-        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        HttpResponse<String> response = httpClient.send(request, handler);
-        String returned = response.body();
-        User returnedUser = gson.fromJson(returned, User.class);
-        Assertions.assertNull(returnedUser.getLogin());
+        try {
+            userController.createUser(user);
+        } catch (ValidationException exception) {
+            Assertions.assertEquals(exception.getMessage(), "Логин не может быть пустым и содержать пробелы!");
+        }
     }
 
-    @Order(6)
     @Test
-    public void shouldNotCreateUserWithEmptyEmail() throws IOException, InterruptedException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        Gson gson = gsonBuilder.create();
+    public void shouldNotCreateUserWithEmptyEmail() {
         User user = new User();
         user.setId(1);
         user.setName("Nikita");
         user.setLogin("rowkien");
         user.setBirthday(LocalDate.of(1997, 5, 19));
-        String json = gson.toJson(user);
-        URI uri = URI.create("http://localhost:8080/users");
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = requestBuilder
-                .POST(body)
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        HttpClient httpClient = HttpClient.newHttpClient();
-
-        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        HttpResponse<String> response = httpClient.send(request, handler);
-        String returned = response.body();
-        User returnedUser = gson.fromJson(returned, User.class);
-        Assertions.assertNull(returnedUser.getEmail());
+        try {
+            userController.createUser(user);
+        } catch (ValidationException exception) {
+            Assertions.assertEquals(exception.getMessage(), "Электронная почта не может быть пустой и должна содержать символ @!");
+        }
     }
 
-    @Order(7)
     @Test
-    public void shouldNotCreateUserIfEmailNotContainsAT() throws IOException, InterruptedException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        Gson gson = gsonBuilder.create();
+    public void shouldNotCreateUserIfEmailNotContainsAT() {
         User user = new User();
         user.setId(1);
         user.setLogin("rowkien");
         user.setEmail("rowkienyandex.ru");
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(1997, 5, 19));
-        String json = gson.toJson(user);
-        URI uri = URI.create("http://localhost:8080/users");
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = requestBuilder
-                .POST(body)
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        HttpClient httpClient = HttpClient.newHttpClient();
-
-        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        HttpResponse<String> response = httpClient.send(request, handler);
-        String returned = response.body();
-        User returnedUser = gson.fromJson(returned, User.class);
-        Assertions.assertNull(returnedUser.getEmail());
+        try {
+            userController.createUser(user);
+        } catch (ValidationException exception) {
+            Assertions.assertEquals(exception.getMessage(), "Электронная почта не может быть пустой и должна содержать символ @!");
+        }
     }
 
-    @Order(8)
     @Test
-    public void shouldSetNameAsLoginIfNameIsEmpty() throws IOException, InterruptedException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        Gson gson = gsonBuilder.create();
+    public void shouldSetNameAsLoginIfNameIsEmpty() {
         User user = new User();
         user.setId(1);
         user.setLogin("rowkien");
         user.setEmail("rowkien@yandex.ru");
         user.setBirthday(LocalDate.of(1997, 5, 19));
-        String json = gson.toJson(user);
-        URI uri = URI.create("http://localhost:8080/users");
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = requestBuilder
-                .POST(body)
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        HttpClient httpClient = HttpClient.newHttpClient();
-
-        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        HttpResponse<String> response = httpClient.send(request, handler);
-        String returned = response.body();
-        User returnedUser = gson.fromJson(returned, User.class);
-        Assertions.assertEquals(returnedUser.getName(), user.getLogin());
+        userController.createUser(user);
+        Assertions.assertEquals(user.getLogin(), user.getName());
     }
 
-    @Order(9)
     @Test
-    public void shouldNotCreateUserIfBirthdayInFuture() throws IOException, InterruptedException {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        Gson gson = gsonBuilder.create();
+    public void shouldNotCreateUserIfBirthdayInFuture() {
         User user = new User();
         user.setId(1);
         user.setLogin("rowkien");
         user.setEmail("rowkien@yandex.ru");
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(3000, 5, 19));
-        String json = gson.toJson(user);
-        URI uri = URI.create("http://localhost:8080/users");
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = requestBuilder
-                .POST(body)
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        HttpClient httpClient = HttpClient.newHttpClient();
-
-        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-        HttpResponse<String> response = httpClient.send(request, handler);
-        String returned = response.body();
-        User returnedUser = gson.fromJson(returned, User.class);
-        Assertions.assertNull(returnedUser.getBirthday());
+        try {
+            userController.createUser(user);
+        } catch (ValidationException exception) {
+            Assertions.assertEquals(exception.getMessage(), "Дата рождения не может быть пустой или в будущем!");
+        }
     }
 }
 
