@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,60 +21,46 @@ public class FilmController {
 
 
     @GetMapping
-    public ArrayList<Film> getAllFilms() {
+    public List<Film> getAllFilms() {
         return new ArrayList<>(films.values());
     }
 
     @PostMapping
     public Film createFilm(@RequestBody Film film) {
-        if (film.getName() == null || film.getName().isBlank() || film.getDescription().length() > 200) {
-            String exception = "Название фильма не может быть пустым или содержать более 200 символов!";
-            log.info(exception);
-            throw new ValidationException(exception);
+        if (isValid(film)) {
+            if (films.isEmpty() || film.getId() == 0) {
+                film.setId(nextId);
+                nextId++;
+            }
+            films.put(film.getId(), film);
         }
-        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            String exception = "Дата фильма не может быть пустой или раньше 28.12.1895!";
-            log.info(exception);
-            throw new ValidationException(exception);
-        }
-        if (film.getDuration() <= 0) {
-            String exception = "Продолжительность фильма не может быть отрицательной!";
-            log.info(exception);
-            throw new ValidationException(exception);
-        }
-        if (films.isEmpty() || film.getId() == 0) {
-            film.setId(nextId);
-            nextId++;
-        }
-        films.put(film.getId(), film);
+        log.info("Фильм" + film + " создан успешно");
         return film;
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
+        if (isValid(film)) {
+            if (films.containsKey(film.getId())) {
+                films.put(film.getId(), film);
+            } else {
+                throw new ValidationException("Такого фильма нет!");
+            }
+        }
+        log.info("Фильм" + film + " обновлен успешно");
+        return film;
+    }
+
+    public boolean isValid(Film film) {
         if (film.getName() == null || film.getName().isBlank() || film.getDescription().length() > 200) {
-            String exception = "Название фильма не может быть пустым или содержать более 200 символов!";
-            log.info(exception);
-            throw new ValidationException(exception);
+            throw new ValidationException("Название фильма не может быть пустым или содержать более 200 символов!");
         }
         if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            String exception = "Дата фильма не может быть пустой или раньше 28.12.1895!";
-            log.info(exception);
-            throw new ValidationException(exception);
+            throw new ValidationException("Дата фильма не может быть пустой или раньше 28.12.1895!");
         }
-
         if (film.getDuration() <= 0) {
-            String exception = "Продолжительность фильма не может быть отрицательной!";
-            log.info(exception);
-            throw new ValidationException(exception);
+            throw new ValidationException("Продолжительность фильма не может быть отрицательной!");
         }
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-        } else {
-            String exception = "Такого фильма нет!";
-            log.info(exception);
-            throw new ValidationException(exception);
-        }
-        return film;
+        return true;
     }
 }
