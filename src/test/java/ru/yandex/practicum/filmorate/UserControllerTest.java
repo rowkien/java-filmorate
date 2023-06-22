@@ -2,19 +2,24 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 
 class UserControllerTest {
 
-    UserController userController;
+    UserService userService;
+
+    UserStorage userStorage;
 
     @BeforeEach
     public void beforeEach() {
-        userController = new UserController();
+        userStorage = new InMemoryUserStorage();
+        userService = new UserService(userStorage);
     }
 
 
@@ -26,7 +31,7 @@ class UserControllerTest {
         user.setEmail("rowkien@yandex.ru");
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(1997, 5, 19));
-        User createdUser = userController.createUser(user);
+        User createdUser = userService.createUser(user);
         Assertions.assertEquals(user, createdUser);
     }
 
@@ -38,8 +43,8 @@ class UserControllerTest {
         user.setEmail("rowkien@yandex.ru");
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(1997, 5, 19));
-        userController.createUser(user);
-        Assertions.assertEquals(user, userController.getAllUsers().get(0));
+        userService.createUser(user);
+        Assertions.assertEquals(user, userService.getAllUsers().get(0));
     }
 
     @Test
@@ -50,9 +55,9 @@ class UserControllerTest {
         user.setEmail("rowkien@yandex.ru");
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(1997, 5, 19));
-        userController.createUser(user);
+        userService.createUser(user);
         user.setLogin("updated");
-        User updatedUser = userController.updateUser(user);
+        User updatedUser = userService.updateUser(user);
         Assertions.assertEquals(updatedUser.getLogin(), "updated");
     }
 
@@ -64,7 +69,7 @@ class UserControllerTest {
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(1997, 5, 19));
         try {
-            userController.createUser(user);
+            userService.createUser(user);
         } catch (ValidationException exception) {
             Assertions.assertEquals(exception.getMessage(), "Логин не может быть пустым и содержать пробелы!");
         }
@@ -79,7 +84,7 @@ class UserControllerTest {
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(1997, 5, 19));
         try {
-            userController.createUser(user);
+            userService.createUser(user);
         } catch (ValidationException exception) {
             Assertions.assertEquals(exception.getMessage(), "Логин не может быть пустым и содержать пробелы!");
         }
@@ -93,7 +98,7 @@ class UserControllerTest {
         user.setLogin("rowkien");
         user.setBirthday(LocalDate.of(1997, 5, 19));
         try {
-            userController.createUser(user);
+            userService.createUser(user);
         } catch (ValidationException exception) {
             Assertions.assertEquals(exception.getMessage(), "Электронная почта не может быть пустой и должна содержать символ @!");
         }
@@ -108,7 +113,7 @@ class UserControllerTest {
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(1997, 5, 19));
         try {
-            userController.createUser(user);
+            userService.createUser(user);
         } catch (ValidationException exception) {
             Assertions.assertEquals(exception.getMessage(), "Электронная почта не может быть пустой и должна содержать символ @!");
         }
@@ -121,7 +126,7 @@ class UserControllerTest {
         user.setLogin("rowkien");
         user.setEmail("rowkien@yandex.ru");
         user.setBirthday(LocalDate.of(1997, 5, 19));
-        userController.createUser(user);
+        userService.createUser(user);
         Assertions.assertEquals(user.getLogin(), user.getName());
     }
 
@@ -134,7 +139,7 @@ class UserControllerTest {
         user.setName("Nikita");
         user.setBirthday(LocalDate.of(3000, 5, 19));
         try {
-            userController.createUser(user);
+            userService.createUser(user);
         } catch (ValidationException exception) {
             Assertions.assertEquals(exception.getMessage(), "Дата рождения не может быть пустой или в будущем!");
         }
