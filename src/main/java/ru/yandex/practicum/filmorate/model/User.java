@@ -8,6 +8,8 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class User {
@@ -23,5 +25,15 @@ public class User {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
+
+    private Set<Integer> friends = new HashSet<>();
+
+    public void addFriend(int id) {
+        friends.add(id);
+    }
+
+    public void deleteFriend(int id) {
+        friends.remove(id);
+    }
 
 }
