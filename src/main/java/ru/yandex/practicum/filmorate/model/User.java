@@ -28,6 +28,14 @@ public class User {
 
     private Set<Integer> friends = new HashSet<>();
 
+    public User(int id, String email, String login, String name, LocalDate birthday) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
+
     public void addFriend(int id) {
         friends.add(id);
     }

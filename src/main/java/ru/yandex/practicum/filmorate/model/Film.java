@@ -8,7 +8,9 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -28,6 +30,18 @@ public class Film {
     private int duration;
 
     private Set<Integer> likes = new HashSet<>();
+
+    private List<Genre> genres = new ArrayList<>();
+
+    private Mpa mpa;
+
+    public Film(int id, String name, String description, int duration, LocalDate releaseDate) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.duration = duration;
+        this.releaseDate = releaseDate;
+    }
 
     public void addLike(int id) {
         likes.add(id);
