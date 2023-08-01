@@ -24,8 +24,8 @@ public class GenreDaoImpl implements GenreDao {
     @Override
     public Genre getGenre(int id) {
         String sql = "SELECT * FROM genre WHERE genre_id = ?";
-        return jdbcTemplate.query(sql, new Object[]{id}, new GenreMapper()).
-                stream()
+        return jdbcTemplate.query(sql, new Object[]{id}, new GenreMapper())
+                .stream()
                 .findAny()
                 .orElse(null);
     }
