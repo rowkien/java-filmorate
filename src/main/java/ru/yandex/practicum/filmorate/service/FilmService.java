@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDao;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.implementations.UserDaoImpl;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -17,9 +18,9 @@ public class FilmService {
 
     private final FilmDao filmDao;
 
-    private int nextId = 1;
+    private final UserDaoImpl userDao;
 
-    private boolean isValid(Film film) {
+    private void isValid(Film film) {
         if (film.getName() == null || film.getName().isBlank() || film.getDescription().length() > 200) {
             throw new ValidationException("Название фильма не может быть пустым или содержать более 200 символов!");
         }
@@ -29,7 +30,6 @@ public class FilmService {
         if (film.getDuration() <= 0) {
             throw new ValidationException("Продолжительность фильма не может быть отрицательной!");
         }
-        return true;
     }
 
 
@@ -42,29 +42,22 @@ public class FilmService {
     }
 
     public Film createFilm(Film film) {
-        if (isValid(film)) {
-            if (film.getId() == 0) {
-                film.setId(nextId);
-                nextId++;
-            }
-        }
+        isValid(film);
         return filmDao.createFilm(film);
     }
 
-
     public Film updateFilm(Film film) {
-        Film updatedFilm = null;
-        if (isValid(film)) {
-            updatedFilm = filmDao.updateFilm(film);
-        }
-        return updatedFilm;
+        isValid(film);
+        return filmDao.updateFilm(film);
     }
 
     public void addLike(int id, int userId) {
+        userDao.checkUser(userId);
         filmDao.addLike(id, userId);
     }
 
     public void removeLike(int id, int userId) {
+        userDao.checkUser(userId);
         filmDao.removeLike(id, userId);
     }
 

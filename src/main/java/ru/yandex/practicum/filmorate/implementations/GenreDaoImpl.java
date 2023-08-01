@@ -17,16 +17,17 @@ public class GenreDaoImpl implements GenreDao {
 
     @Override
     public List<Genre> getAllGenres() {
-        String sql = "select * from genre";
+        String sql = "SELECT * FROM genre";
         return jdbcTemplate.query(sql, new GenreMapper());
     }
 
     @Override
     public Genre getGenre(int id) {
-        String sql = "select * from genre where genre_id = ?";
+        String sql = "SELECT * FROM genre WHERE genre_id = ?";
         return jdbcTemplate.query(sql, new Object[]{id}, new GenreMapper()).
                 stream()
                 .findAny()
                 .orElse(null);
     }
+
 }

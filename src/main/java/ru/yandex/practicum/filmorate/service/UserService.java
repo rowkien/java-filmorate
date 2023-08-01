@@ -15,11 +15,9 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
-
     private final UserDao userDao;
-    private int nextId = 1;
 
-    private boolean isValid(User user) {
+    private void isValid(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @!");
         }
@@ -32,7 +30,6 @@ public class UserService {
         if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения не может быть пустой или в будущем!");
         }
-        return true;
     }
 
     public List<User> getAllUsers() {
@@ -44,21 +41,13 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        if (isValid(user)) {
-            if (user.getId() == 0) {
-                user.setId(nextId);
-                nextId++;
-            }
-        }
+        isValid(user);
         return userDao.createUser(user);
     }
 
     public User updateUser(User user) {
-        User updatedUser = null;
-        if (isValid(user)) {
-            updatedUser = userDao.updateUser(user);
-        }
-        return updatedUser;
+        isValid(user);
+        return userDao.updateUser(user);
     }
 
     public void addFriend(int id, int friendId) {

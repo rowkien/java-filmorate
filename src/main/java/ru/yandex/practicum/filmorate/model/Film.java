@@ -35,12 +35,13 @@ public class Film {
 
     private Mpa mpa;
 
-    public Film(int id, String name, String description, int duration, LocalDate releaseDate) {
+    public Film(int id, String name, String description, int duration, LocalDate releaseDate, Mpa mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.duration = duration;
         this.releaseDate = releaseDate;
+        this.mpa = mpa;
     }
 
     public void addLike(int id) {

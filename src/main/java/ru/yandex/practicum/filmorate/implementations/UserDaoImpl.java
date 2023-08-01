@@ -2,12 +2,16 @@ package ru.yandex.practicum.filmorate.implementations;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.mappers.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.util.List;
 
 @Component
@@ -16,7 +20,7 @@ public class UserDaoImpl implements UserDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private User checkUser(int id) {
+    public User checkUser(int id) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
         User user = jdbcTemplate.query(sql, new Object[]{id}, new UserMapper())
                 .stream()
@@ -41,14 +45,24 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User createUser(User user) {
-        String sql = "INSERT INTO users VALUES (?,?,?,?,?)";
-        jdbcTemplate.update(sql, user.getId(), user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
+        String sql = "INSERT INTO users (email, login, name, birthday) " +
+                "VALUES (?, ?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"user_id"});
+            stmt.setString(1, user.getEmail());
+            stmt.setString(2, user.getLogin());
+            stmt.setString(3, user.getName());
+            stmt.setDate(4, Date.valueOf(user.getBirthday()));
+            return stmt;
+        }, keyHolder);
+        user.setId(keyHolder.getKey().intValue());
         return user;
     }
 
     @Override
     public User updateUser(User user) {
-        String sql = "select * from users where user_id = ?";
+        String sql = "SELECT * FROM users WHERE user_id = ?";
         User updatedUser = jdbcTemplate.query(sql, new Object[]{user.getId()}, new UserMapper())
                 .stream()
                 .findAny()
@@ -56,7 +70,7 @@ public class UserDaoImpl implements UserDao {
         if (updatedUser == null) {
             throw new NotFoundException("Такого пользователя в базе нет!");
         }
-        String sqlUpdate = "update users set email = ?, login = ?, name = ?, birthday = ? where user_id = ?";
+        String sqlUpdate = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? where user_id = ?";
         jdbcTemplate.update(sqlUpdate, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         return user;
     }
@@ -65,7 +79,7 @@ public class UserDaoImpl implements UserDao {
     public void addFriend(int id, int friendId) {
         checkUser(id);
         checkUser(friendId);
-        String sql = "insert into users_friends values(?,?)";
+        String sql = "INSERT INTO users_friends VALUES(?,?)";
         jdbcTemplate.update(sql, id, friendId);
     }
 
@@ -73,22 +87,29 @@ public class UserDaoImpl implements UserDao {
     public void deleteFriend(int id, int friendId) {
         checkUser(id);
         checkUser(friendId);
-        String sql = "delete from users_friends where user_id = ? and friend_id = ?";
+        String sql = "DELETE FROM users_friends WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sql, id, friendId);
     }
 
-    @Override // здесь нужно будет через join корее всего
+    @Override
     public List<User> getUserFriends(int id) {
         checkUser(id);
-        String sql = "";
+        String sql = "SELECT *\n" +
+                "FROM USERS u \n" +
+                "JOIN USERS_FRIENDS uf ON u.USER_ID  = uf.FRIEND_ID \n" +
+                "WHERE uf.USER_ID = ?";
         return jdbcTemplate.query(sql, new UserMapper(), id);
     }
 
-    @Override //здесь нужен будет подзапрос скорее всего
+    @Override
     public List<User> getCommonFriends(int id, int otherId) {
         checkUser(id);
         checkUser(otherId);
-        String sql = "";
+        String sql = "SELECT DISTINCT *\n" +
+                "FROM USERS u\n" +
+                "JOIN USERS_FRIENDS uf ON u.USER_ID = uf.FRIEND_ID\n" +
+                "JOIN USERS_FRIENDS uf2 ON u.USER_ID = uf2.FRIEND_ID\n" +
+                "WHERE uf.USER_ID = ? AND uf2.USER_ID = ?";
         return jdbcTemplate.query(sql, new UserMapper(), id, otherId);
     }
 }

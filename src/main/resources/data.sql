@@ -1,12 +1,12 @@
-MERGE INTO mpa (mpa_id, name)
+MERGE INTO mpa (mpa_id, mpa_name)
 VALUES(1,'G');
-MERGE INTO mpa (mpa_id, name)
+MERGE INTO mpa (mpa_id, mpa_name)
 VALUES(2,'PG');
-MERGE INTO mpa (mpa_id, name)
+MERGE INTO mpa (mpa_id, mpa_name)
 VALUES(3,'PG-13');
-MERGE INTO mpa (mpa_id, name)
+MERGE INTO mpa (mpa_id, mpa_name)
 VALUES(4,'R');
-MERGE INTO mpa (mpa_id, name)
+MERGE INTO mpa (mpa_id, mpa_name)
 VALUES(5,'NC-17');
 
 MERGE INTO genre (genre_id, name)

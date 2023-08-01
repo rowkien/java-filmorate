@@ -8,8 +8,6 @@ import ru.yandex.practicum.filmorate.dao.MpaDao;
 import ru.yandex.practicum.filmorate.mappers.MpaMapper;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 @Component
@@ -20,18 +18,18 @@ public class MpaDaoImpl implements MpaDao {
 
     @Override
     public List<Mpa> getAllMpa() {
-        String sql = "select * from mpa";
+        String sql = "SELECT * FROM mpa";
         return jdbcTemplate.query(sql, new MpaMapper());
     }
 
     @Override
     public Mpa getMpa(int id) {
         Mpa mpa = null;
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from mpa where mpa_id = ?", id);
+        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("SELECT * FROM mpa WHERE mpa_id = ?", id);
         if (mpaRows.next()) {
             mpa = new Mpa(
                     mpaRows.getInt("mpa_id"),
-                    mpaRows.getString("name")
+                    mpaRows.getString("mpa_name")
             );
         }
         return mpa;
