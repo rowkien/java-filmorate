@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.dao.GenreDao;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.mappers.GenreMapper;
@@ -15,16 +16,15 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class FilmDaoImpl implements FilmDao {
     private final JdbcTemplate jdbcTemplate;
+
+    private final GenreDao genreDao;
 
     public Film checkFilm(int id) {
         String sql = "SELECT * FROM films JOIN mpa ON films.mpa_id = mpa.mpa_id WHERE film_id = ?";
@@ -69,7 +69,9 @@ public class FilmDaoImpl implements FilmDao {
             return stmt;
         }, keyHolder);
         film.setId(keyHolder.getKey().intValue());
-        addFilmGenre(film.getGenres(), film.getId());
+        if (film.getGenres() != null) {
+            addFilmGenre(film.getGenres(), film.getId());
+        }
         return film;
     }
 
@@ -106,7 +108,7 @@ public class FilmDaoImpl implements FilmDao {
             genresId.add(genre.getId());
         }
         for (int id : genresId) {
-            Genre genre = new Genre(id, getGenreName(id));
+            Genre genre = genreDao.getGenre(id);
             result.add(genre);
             jdbcTemplate.update(sql, filmId, id);
         }
@@ -141,32 +143,5 @@ public class FilmDaoImpl implements FilmDao {
             topFilms = getAllFilms();
         }
         return topFilms;
-    }
-
-    private String getGenreName(int id) {
-        String genreName;
-        switch (id) {
-            case 1:
-                genreName = "Комедия";
-                break;
-            case 2:
-                genreName = "Драма";
-                break;
-            case 3:
-                genreName = "Мультфильм";
-                break;
-            case 4:
-                genreName = "Триллер";
-                break;
-            case 5:
-                genreName = "Документальный";
-                break;
-            case 6:
-                genreName = "Боевик";
-                break;
-            default:
-                throw new NotFoundException("Такого жанра нет в базе!");
-        }
-        return genreName;
     }
 }

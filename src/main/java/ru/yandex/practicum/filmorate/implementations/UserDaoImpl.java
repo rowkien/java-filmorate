@@ -20,6 +20,7 @@ public class UserDaoImpl implements UserDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Override
     public User checkUser(int id) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
         User user = jdbcTemplate.query(sql, new Object[]{id}, new UserMapper())

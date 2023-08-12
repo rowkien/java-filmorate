@@ -10,17 +10,16 @@ import java.sql.SQLException;
 public class FilmMapper implements RowMapper<Film> {
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-        Film film = new Film(
-                rs.getInt("film_id"),
-                rs.getString("name"),
-                rs.getString("description"),
-                rs.getInt("duration"),
-                rs.getDate("release_date").toLocalDate(),
-                new Mpa(
+        return Film.builder()
+                .id(rs.getInt("film_id"))
+                .name(rs.getString("name"))
+                .description(rs.getString("description"))
+                .duration(rs.getInt("duration"))
+                .releaseDate(rs.getDate("release_date").toLocalDate())
+                .mpa(new Mpa(
                         rs.getInt("mpa_id"),
                         rs.getString("mpa_name")
-                )
-        );
-        return film;
+                ))
+                .build();
     }
 }

@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.implementations.UserDaoImpl;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -18,7 +18,7 @@ public class FilmService {
 
     private final FilmDao filmDao;
 
-    private final UserDaoImpl userDao;
+    private final UserDao userDao;
 
     private void isValid(Film film) {
         if (film.getName() == null || film.getName().isBlank() || film.getDescription().length() > 200) {

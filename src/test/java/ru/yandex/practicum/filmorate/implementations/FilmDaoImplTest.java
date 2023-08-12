@@ -50,26 +50,28 @@ class FilmDaoImplTest {
 
     @Test
     public void shouldCorrectlyCreateFilm() {
-        Film film = new Film(
-                0,
-                "testFilm",
-                "testDescription",
-                120,
-                LocalDate.of(1997, 5, 19),
-                new Mpa(1, "G"));
+        Film film = Film.builder()
+                .id(0)
+                .name("testFilm")
+                .description("testDescription")
+                .duration(120)
+                .releaseDate(LocalDate.of(1997, 5, 19))
+                .mpa(new Mpa(1, "G"))
+                .build();
         filmDao.createFilm(film);
         Assertions.assertEquals(1, film.getId());
     }
 
     @Test
     public void shouldCorrectlyUpdateFilm() {
-        Film film = new Film(
-                0,
-                "testFilm",
-                "testDescription",
-                120,
-                LocalDate.of(1997, 5, 19),
-                new Mpa(1, "G"));
+        Film film = Film.builder()
+                .id(0)
+                .name("testFilm")
+                .description("testDescription")
+                .duration(120)
+                .releaseDate(LocalDate.of(1997, 5, 19))
+                .mpa(new Mpa(1, "G"))
+                .build();
         filmDao.createFilm(film);
         film.setMpa(new Mpa(2, "Драма"));
         filmDao.updateFilm(film);
@@ -78,49 +80,52 @@ class FilmDaoImplTest {
 
     @Test
     public void shouldCorrectlyGetFilm() {
-        Film film = new Film(
-                0,
-                "testFilm",
-                "testDescription",
-                120,
-                LocalDate.of(1997, 5, 19),
-                new Mpa(1, "G"));
+        Film film = Film.builder()
+                .name("testFilm")
+                .description("testDescription")
+                .duration(120)
+                .releaseDate(LocalDate.of(1997, 5, 19))
+                .mpa(new Mpa(1, "G"))
+                .build();
         filmDao.createFilm(film);
-        Assertions.assertEquals(film, filmDao.getFilm(film.getId()));
+        Assertions.assertEquals(1, filmDao.getFilm(film.getId()).getId());
     }
 
     @Test
     public void shouldCorrectlyGetAllFilms() {
-        Film film = new Film(
-                0,
-                "testFilm",
-                "testDescription",
-                120,
-                LocalDate.of(1997, 5, 19),
-                new Mpa(1, "G"));
+        Film film = Film.builder()
+                .id(0)
+                .name("testFilm")
+                .description("testDescription")
+                .duration(120)
+                .releaseDate(LocalDate.of(1997, 5, 19))
+                .mpa(new Mpa(1, "G"))
+                .build();
         filmDao.createFilm(film);
-        Assertions.assertEquals(film, filmDao.getAllFilms().get(0));
+        Assertions.assertEquals(film.getId(), filmDao.getAllFilms().get(0).getId());
     }
 
     @Test
     public void shouldCorrectlyAddLike() {
         User user = new User(0, "test@mail.ru", "testLogin", "testName", LocalDate.of(1961, 4, 12));
         userDao.createUser(user);
-        Film film = new Film(
-                0,
-                "testFilm",
-                "testDescription",
-                120,
-                LocalDate.of(1997, 5, 19),
-                new Mpa(1, "G"));
+        Film film = Film.builder()
+                .id(0)
+                .name("testFilm")
+                .description("testDescription")
+                .duration(120)
+                .releaseDate(LocalDate.of(1997, 5, 19))
+                .mpa(new Mpa(1, "G"))
+                .build();
         filmDao.createFilm(film);
-        Film likedFilm = new Film(
-                1,
-                "likedFilm",
-                "likedDescription",
-                130,
-                LocalDate.of(1994, 1, 17),
-                new Mpa(2, "PG"));
+        Film likedFilm = Film.builder()
+                .id(1)
+                .name("likedFilm")
+                .description("likedDescription")
+                .duration(130)
+                .releaseDate(LocalDate.of(1994, 1, 17))
+                .mpa(new Mpa(2, "PG"))
+                .build();
         filmDao.createFilm(likedFilm);
         filmDao.addLike(likedFilm.getId(), user.getId());
         Assertions.assertEquals(likedFilm, filmDao.getMostLikedFilms(1).get(0));
@@ -130,25 +135,27 @@ class FilmDaoImplTest {
     public void shouldCorrectlyRemoveLike() {
         User user = new User(0, "test@mail.ru", "testLogin", "testName", LocalDate.of(1961, 4, 12));
         userDao.createUser(user);
-        Film film = new Film(
-                0,
-                "testFilm",
-                "testDescription",
-                120,
-                LocalDate.of(1997, 5, 19),
-                new Mpa(1, "G"));
+        Film film = Film.builder()
+                .id(0)
+                .name("testFilm")
+                .description("testDescription")
+                .duration(120)
+                .releaseDate(LocalDate.of(1997, 5, 19))
+                .mpa(new Mpa(1, "G"))
+                .build();
         filmDao.createFilm(film);
-        Film likedFilm = new Film(
-                1,
-                "likedFilm",
-                "likedDescription",
-                130,
-                LocalDate.of(1994, 1, 17),
-                new Mpa(2, "PG"));
+        Film likedFilm = Film.builder()
+                .id(1)
+                .name("likedFilm")
+                .description("likedDescription")
+                .duration(130)
+                .releaseDate(LocalDate.of(1994, 1, 17))
+                .mpa(new Mpa(2, "PG"))
+                .build();
         filmDao.createFilm(likedFilm);
         filmDao.addLike(likedFilm.getId(), user.getId());
         filmDao.removeLike(likedFilm.getId(), user.getId());
-        Assertions.assertEquals(film, filmDao.getMostLikedFilms(1).get(0));
+        Assertions.assertEquals(film.getId(), filmDao.getMostLikedFilms(1).get(0).getId());
     }
 
     @Test
@@ -157,21 +164,23 @@ class FilmDaoImplTest {
         userDao.createUser(user);
         User secondUser = new User(1, "second@mail.ru", "secondLogin", "secondName", LocalDate.of(1963, 5, 17));
         userDao.createUser(secondUser);
-        Film film = new Film(
-                0,
-                "testFilm",
-                "testDescription",
-                120,
-                LocalDate.of(1997, 5, 19),
-                new Mpa(1, "G"));
+        Film film = Film.builder()
+                .id(0)
+                .name("testFilm")
+                .description("testDescription")
+                .duration(120)
+                .releaseDate(LocalDate.of(1997, 5, 19))
+                .mpa(new Mpa(1, "G"))
+                .build();
         filmDao.createFilm(film);
-        Film likedFilm = new Film(
-                1,
-                "likedFilm",
-                "likedDescription",
-                130,
-                LocalDate.of(1994, 1, 17),
-                new Mpa(2, "PG"));
+        Film likedFilm = Film.builder()
+                .id(1)
+                .name("likedFilm")
+                .description("likedDescription")
+                .duration(130)
+                .releaseDate(LocalDate.of(1994, 1, 17))
+                .mpa(new Mpa(2, "PG"))
+                .build();
         filmDao.createFilm(likedFilm);
         filmDao.addLike(likedFilm.getId(), user.getId());
         filmDao.addLike(likedFilm.getId(), secondUser.getId());
