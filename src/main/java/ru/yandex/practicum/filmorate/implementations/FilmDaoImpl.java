@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.dao.FilmDao;
 import ru.yandex.practicum.filmorate.dao.GenreDao;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.mappers.FilmMapper;
-import ru.yandex.practicum.filmorate.mappers.GenreMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -28,26 +27,21 @@ public class FilmDaoImpl implements FilmDao {
 
     public Film checkFilm(int id) {
         String sql = "SELECT * FROM films JOIN mpa ON films.mpa_id = mpa.mpa_id WHERE film_id = ?";
-        Film film = jdbcTemplate.query(sql, new Object[]{id}, new FilmMapper())
-                .stream()
-                .findAny()
-                .orElse(null);
-        if (film == null) {
-            throw new NotFoundException("Такого фильма в базе нет!");
+        List<Film> film = jdbcTemplate.query(sql, new FilmMapper(), id);
+        if (film.size() == 0) {
+            throw new NotFoundException("Фильма с id " + id + "нет в базе!");
         }
-        film.setGenres(loadFilmGenres(id));
-        return film;
+        loadFilmGenres(film);
+        return film.get(0);
     }
 
     @Override
     public List<Film> getAllFilms() {
-        String sql = "SELECT * FROM films JOIN mpa ON films.mpa_id = mpa.mpa_id";
-        List<Film> allFilms = jdbcTemplate.query(sql, new FilmMapper());
-        for (Film film : allFilms) {
-            film.setGenres(loadFilmGenres(film.getId()));
-        }
-        return allFilms;
+        String filmSql = "SELECT * FROM films JOIN mpa ON films.mpa_id = mpa.mpa_id";
+        List<Film> allFilms = jdbcTemplate.query(filmSql, new FilmMapper());
+        return loadFilmGenres(allFilms);
     }
+
 
     @Override
     public Film getFilm(int id) {
@@ -115,9 +109,21 @@ public class FilmDaoImpl implements FilmDao {
         return result;
     }
 
-    private List<Genre> loadFilmGenres(int id) {
-        String sql = "SELECT * FROM films_genre JOIN genre ON films_genre.genre_id = genre.genre_id WHERE film_id = ?";
-        return jdbcTemplate.query(sql, new GenreMapper(), id);
+    private List<Film> loadFilmGenres(List<Film> films) {
+        if (!films.isEmpty()) {
+            String genresSql = "SELECT * FROM films_genre JOIN genre ON films_genre.genre_id = genre.genre_id WHERE film_id IN (SELECT film_id FROM films)";
+            Map<Integer, List<Genre>> filmGenresMap = new HashMap<>();
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(genresSql);
+            for (Map<String, Object> row : rows) {
+                int filmId = (int) row.get("film_id");
+                Genre genre = new Genre((Integer) row.get("genre_id"), (String) row.get("name"));
+                filmGenresMap.computeIfAbsent(filmId, k -> new ArrayList<>()).add(genre);
+            }
+            for (Film film : films) {
+                film.setGenres(filmGenresMap.getOrDefault(film.getId(), new ArrayList<>()));
+            }
+        }
+        return films;
     }
 
     @Override
