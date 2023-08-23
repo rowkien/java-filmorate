@@ -5,17 +5,19 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
+@Builder
 public class Film {
 
-    private int id;
 
+    private int id;
     private String name;
 
     private String description;
@@ -27,7 +29,11 @@ public class Film {
 
     private int duration;
 
-    private Set<Integer> likes = new HashSet<>();
+    private Set<Integer> likes;
+
+    private List<Genre> genres;
+
+    private Mpa mpa;
 
     public void addLike(int id) {
         likes.add(id);
@@ -36,4 +42,5 @@ public class Film {
     public void removeLike(int id) {
         likes.remove(id);
     }
+
 }
